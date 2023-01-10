@@ -18,8 +18,8 @@ The files data_imputation.ipynb, entry_technological_fields.ipynb, and technolog
 
 ### Dependencies
 
-* Python 3.10
-* R 4.2
+* Python 3.10 (https://www.python.org)
+* R 4.2 (https://cran.r-project.org)
 * Docker 20.1 (https://www.docker.com)
 
 ## Authors
