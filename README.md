@@ -2,7 +2,7 @@
 
 The Core-Periphery Setting of Technological Change
 
-An explanatory logistic regression model to estimate the effect of interregional linkages on technological diversification in peripheral regions & an exploratory approach to investigate technological diversification from an evolutionary perspective.
+An explanatory logistic regression model for statistical inference to estimate the effect of interregional linkages on technological diversification in peripheral regions & an exploratory approach to investigate technological diversification from an econonomic evolutionary perspective.
 
 *To what extent does the diversification into new technological fields within regions depend on interregional linkages and vary over the geographical and the functional perspective?*
 
