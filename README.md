@@ -6,7 +6,7 @@ An explanatory logistic regression model for statistical inference to estimate t
 
 *To what extent does the diversification into new technological fields within regions depend on interregional linkages and vary over the geographical and the functional perspective?*
 
-*What are the similarities and the differences of diversification into new technological\\fields with regards to the geographical and the functional perspective?*
+*What are the similarities and the differences of diversification into new technological fields with regards to the geographical and the functional perspective?*
 
 ## Description
 
