@@ -7,8 +7,6 @@ library(eurostat)
 library(ggpubr)
 library(ggsci)
 
-data(efta_countries)
-
 # ---- patent data  ----
 
 setwd("Data/Patents/OECD_REGPAT_202208/")
