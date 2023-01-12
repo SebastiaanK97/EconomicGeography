@@ -1,6 +1,13 @@
 
 # function dplyr to matrix
 function_tecnological_entry_period <- function(IPC, APP, geo_data) {
+  #' Entry of Technological fields per Region per Period
+  #' 
+  #' @description Computes the entry of technological fields
+  #' 
+  #' @param IPC: Data frame from PATSAT to identify technological fields.
+  #' @param APP: Data frame from PATSAT to match patents to regions.
+  #' @param geo_data: Data frame from Eurostat to define regions.
 
 # define time frame
 period <- c(0, 1, 2, 3, 4)
