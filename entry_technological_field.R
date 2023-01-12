@@ -1,11 +1,13 @@
 
 library(tidyverse)
+# http://econ.geo.uu.nl/peeg/peeg1709.pdf
 library(EconGeo)
-#http://stavrakoudis.econ.uoi.gr/r-eurostat/drawing-maps-of-europe.html
+# http://stavrakoudis.econ.uoi.gr/r-eurostat/drawing-maps-of-europe.html
 library(eurostat)
 
 library(ggpubr)
 library(ggsci)
+library(scales)
 
 # ---- patent data  ----
 
@@ -99,7 +101,7 @@ setwd("../../../EconomicGeography/")
 getwd()
 dir()
 source("function_entry_period.R")
-tecnological_entry_period <- function_tecnological_entry_period(IPC=IPC, APP=APP, geo_data=geo_data)
+technological_entry_period <- function_technological_entry_period(IPC=IPC, APP=APP, geo_data=geo_data)
 
 # descriptive output
 mean(tecnological_entry_period$entry, na.rm=TRUE)
@@ -108,11 +110,24 @@ sum(is.na(tecnological_entry_period$entry))
 
 # ---- entry to map ----
 
-tecnological_entry_period %>%
+sum_entry <- tecnological_entry_period %>%
+  #filter(period == 5) %>%
   group_by(region) %>%
   summarise(n=sum(entry, na.rm=TRUE)) %>%
-  arrange(-n)
+  select(geo=region, n)
 
+EU_EFTA <- geo_data %>%
+  filter(geo %in% unique(tecnological_entry_period$region)) %>%
+  left_join(sum_entry)
 
+ggplot(EU_EFTA, aes(fill=n)) + geom_sf(size=0.1, color="#4D4D4D") + 
+  theme_void(base_size = 18, base_family = "Georgia") +
+  scale_x_continuous(limits=c(-25, 35)) + scale_y_continuous(limits=c(35, 70)) +
+  scale_fill_gradient(low="#003764", high="#93BA5A", name="Entry",
+                      guide=guide_colorbar(barwidth=unit(0.5, "cm"), 
+                                           barheight=unit(7.5, "cm"))) +
+  labs(title="Technological Diversification in the EU & EFTA",
+       subtitle="Entry of Technological Fields 1994-2018 per Region")
 
-
+getwd()
+write.csv(technological_entry_period, "technological_entry_period.csv", row.names=FALSE)

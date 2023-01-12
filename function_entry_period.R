@@ -1,6 +1,6 @@
 
 # function dplyr to matrix
-function_tecnological_entry_period <- function(IPC, APP, geo_data) {
+function_technological_entry_period <- function(IPC, APP, geo_data) {
   #' Entry of Technological fields per Region per Period
   #' 
   #' @description Computes the entry of technological fields
@@ -41,9 +41,9 @@ for (i in 1:nrow(time_frame["period"])) {
 
 # compute entry of technological fields for multiple periods
 # note if RTA_t = 1 and RTA_t+1 = 1 then the technological entry results in NA
-tecnological_entry_period <- entry.list(mat_RTA_t1, mat_RTA_t2, mat_RTA_t3, mat_RTA_t4, mat_RTA_t5)
+technological_entry_period <- entry.list(mat_RTA_t1, mat_RTA_t2, mat_RTA_t3, mat_RTA_t4, mat_RTA_t5)
 
 # return result from function
-return(tecnological_entry_period)
+return(technological_entry_period)
 
 }
