@@ -10,13 +10,13 @@ function_technological_entry_period <- function(IPC, APP, geo_data) {
   #' @param geo_data: Data frame from Eurostat to define regions.
 
 # define time frame
-period <- c(0, 1, 2, 3, 4)
-start <- c(1994, 1999, 2004, 2009, 2013)
+period <- c(1, 2, 3, 4, 5)
+start <- c(1994, 1999, 2004, 2009, 2014)
 end <- c(1998, 2003, 2008, 2013, 2018)
 time_frame <- as.data.frame(cbind(period, start, end))
 
 for (i in 1:nrow(time_frame["period"])) {
-  
+
   # create variable name in for-loop for t
   name <-  paste("mat_RTA_t", i, sep = "")
   
