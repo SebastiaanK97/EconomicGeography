@@ -18,5 +18,7 @@ IPC <- read.csv("202208_EPO_IPC.txt", sep = "|")
 APP <- read.csv("202208_EPO_App_reg.txt", sep = "|")
 INV <- read.csv("202208_EPO_Inv_reg.txt", sep = "|")
 
+# ---- relatedness density
 
+technological_entry_period <- function_technological_entry_period(IPC=IPC, APP=APP, geo_data=geo_data)
 
