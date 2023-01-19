@@ -1,5 +1,5 @@
 
-# function dplyr to matrix
+# function patent data frame to coocurrence matrix to entry data frame
 function_technological_entry_period <- function(IPC, APP, geo_data) {
   #' Entry of Technological fields per Region per Period
   #' 
