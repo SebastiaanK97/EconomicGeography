@@ -18,19 +18,29 @@ library(classInt)
 
 # ---- patent data  ----
 
-setwd("../Data/Patents/OECD_REGPAT_202208/")
+setwd("../../Data/Patents/OECD_REGPAT_202208/")
 dir()
 
 IPC <- read.csv("202208_EPO_IPC.txt", sep="|")
+CPC <- read.csv("202208_CPC_Classes.txt", sep="|")
 APP <- read.csv("202208_EPO_App_reg.txt", sep="|")
 INV <- read.csv("202208_EPO_Inv_reg.txt", sep="|")
+
+IPC_CPC <- IPC %>%
+  left_join(CPC)
 
 # ---- technological demarcation ----
 
 # amount of technological classes
-length(unique(substr(IPC$IPC, 1, 4)))
+length(unique(substr(IPC_CPC$CPC_Class, 1, 4)))
 # set IPC4 to four-digit Cooperative Patent Classification (CPC)
-IPC$IPC4 <- substr(IPC$IPC, 1, 4)
+IPC_CPC$CPC4 <- substr(IPC_CPC$CPC_Class, 1, 4)
+
+CPC_clean <- IPC_CPC %>%
+  select(appln_id, prio_year, CPC4) %>%
+  unique()
+
+head(CPC_clean)
 
 # ---- regional demarcation ----
 
@@ -55,9 +65,10 @@ ctry <- as.data.frame(cbind(ctry_short, ctry_long))
 colnames(ctry) <- c("short", "long")
 
 # amount of regions
-length(unique(substr(APP$reg_code, 1, 4)))
+length(unique(substr(INV$reg_code, 1, 4)))
 # set NUTS2 regions to four-digit Nomenclature of Territorial Units for Statistics
-APP$NUTS2 <- substr(APP$reg_code, 1, 4)
+INV$NUTS2 <- substr(INV$reg_code, 1, 4)
+length(unique(INV$reg_code))
 
 geo_data <- get_eurostat_geospatial(output_class = "sf", resolution = "60", nuts_level = "2", year = "2013") %>%
   filter(CNTR_CODE %in% ctry$short)
@@ -73,17 +84,29 @@ geo_data <- geo_data %>%
   filter(!geo %in% c("UKI3", "UKI4", "UKI5", "UKI6", "UKI7"))
 # rename Iceland NUTS2
 geo_data[["geo"]][geo_data[["geo"]] == "IS00"] <- "IS01"
-length(unique(geo_data$geo))
+geo_data$NUTS2 <- geo_data$geo
+length(unique(geo_data$NUTS2))
 
 # ---- sample validation ----
 
 IPC4_NUTS2_1994_2018 <- IPC %>%
   filter(prio_year >= 1994 & prio_year <= 2018) %>%
-  left_join(APP) %>%
+  left_join(INV) %>%
   filter(NUTS2 %in% geo_data$geo) %>%
   select(NUTS2, IPC4) %>%
   mutate(count = 1) %>%
   filter(IPC4 != "")
+
+IPC4_NUTS2_1994_2018 <- IPC %>%
+  filter(prio_year >= 1994 & prio_year <= 2018) %>%
+  left_join(INV) %>%
+  filter(NUTS2 %in% geo_data$NUTS2) %>%
+  right_join(geo_data) %>%
+  select(NUTS2, IPC4) %>%
+  mutate(count = 1) %>%
+  filter(IPC4 != "")
+  
+length(unique(IPC4_NUTS2_1994_2018$NUTS2))
 
 IPC4_NUTS2_1994_2018_count <- IPC4_NUTS2_1994_2018 %>%
   group_by(NUTS2) %>%
@@ -96,7 +119,7 @@ length(unique(IPC4_NUTS2_1994_2018$NUTS2))
 # amount of countries
 length(unique(substr(IPC4_NUTS2_1994_2018$NUTS2, 1, 2)))
 # missingness in islands of France (FRA1-5), Cueta in Spain (ES63)
-setdiff(geo_data$geo, IPC4_NUTS2_1994_2018$NUTS2)
+setdiff(geo_data$NUTS2, IPC4_NUTS2_1994_2018$NUTS2)
 
 ggplot(IPC4_NUTS2_1994_2018_count, aes(x=n)) + geom_density(n=16) + scale_x_log10() +
   theme_pubr(base_size = 18, base_family = "Georgia") +
@@ -104,20 +127,24 @@ ggplot(IPC4_NUTS2_1994_2018_count, aes(x=n)) + geom_density(n=16) + scale_x_log1
 
 # ---- data to matrix to entry ----
 
-setwd("../../../EconomicGeography/")
+setwd("../../../EconomicGeography/Functions/")
 getwd()
 dir()
 source("function_entry_period.R")
-technological_entry_period <- function_technological_entry_period(IPC=IPC, APP=APP, geo_data=geo_data)
+entry_period <- function_entry_period(IPC=IPC, APP=APP, geo_data=geo_data,
+                                      end_year_input=2018, number_period_input=5, length_period_input=5)
 
 # descriptive output
-mean(technological_entry_period$entry, na.rm=TRUE)
-sd(technological_entry_period$entry, na.rm=TRUE)
-sum(is.na(technological_entry_period$entry))
+mean(entry_period$entry, na.rm=TRUE)
+sd(entry_period$entry, na.rm=TRUE)
+sum(is.na(entry_period$entry))
 
 getwd()
-write.csv(technological_entry_period, "technological_entry_period.csv", row.names=FALSE)
-technological_entry_period <- read.csv("technological_entry_period.csv", sep=",")
+write.csv(entry_period, "../Data/entry_period.csv", row.names=FALSE)
+entry_period <- read.csv("../Data/entry_period.csv", sep=",")
+
+# ---- data to matrix to relatedness density ----
+
 
 
 
