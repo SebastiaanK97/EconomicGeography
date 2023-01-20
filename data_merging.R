@@ -1,20 +1,6 @@
 
-library(tidyverse)
-# http://econ.geo.uu.nl/peeg/peeg1709.pdf
-library(EconGeo)
-# http://stavrakoudis.econ.uoi.gr/r-eurostat/drawing-maps-of-europe.html
 library(eurostat)
-library(sf)
-
-library(ggpubr)
-library(ggsci)
-library(scales)
-
-c("#E8B63C", "#93BA5A", "#27A581", "#1A7789", "#003764")
-c("#27A581", "#93BA5A", "#E8B63C", "#DE8C3F", "#CF553A")
-c("#CF553A", "#DE8C3F", "#E8B63C", "#93BA5A", "#27A581")
-
-library(classInt)
+library(tidyverse)
 
 # ---- patent data  ----
 
@@ -26,8 +12,32 @@ CPC <- read.csv("202208_CPC_Classes.txt", sep="|")
 APP <- read.csv("202208_EPO_App_reg.txt", sep="|")
 INV <- read.csv("202208_EPO_Inv_reg.txt", sep="|")
 
-IPC_CPC <- IPC %>%
-  left_join(CPC)
+CPC_clean <- IPC %>%
+  select(appln_id, prio_year) %>%
+  unique() %>%
+  left_join(CPC) %>%
+  mutate(CPC4 = substr(CPC_Class, 1, 4)) %>%
+  select(-CPC_Class) %>%
+  #unique() %>%
+  # filter primary technological field for technological identification
+  group_by(appln_id) %>%
+  filter(row_number() == 1)
+
+head(CPC_clean, 10)
+
+CPC_INV_clean <- CPC_clean %>%
+  left_join(INV) %>%
+  # filter primary inventor for regional identification
+  group_by(appln_id) %>%
+  filter(row_number() == 1) %>%
+  mutate(NUTS2 = substr(reg_code, 1, 4)) %>%
+  select(appln_id, prio_year, CPC4, NUTS2)
+
+head(CPC_INV_clean, 10)
+
+setwd("../../../../Analysis/EconomicGeography/Data/")
+write.csv(CPC_INV_clean, "CPC_INC_clean.csv", row.names=FALSE)
+CPC_INV_clean <- read.csv("CPC_INC_clean.csv", sep=",")
 
 # ---- technological demarcation ----
 
@@ -86,68 +96,3 @@ geo_data <- geo_data %>%
 geo_data[["geo"]][geo_data[["geo"]] == "IS00"] <- "IS01"
 geo_data$NUTS2 <- geo_data$geo
 length(unique(geo_data$NUTS2))
-
-# ---- sample validation ----
-
-IPC4_NUTS2_1994_2018 <- IPC %>%
-  filter(prio_year >= 1994 & prio_year <= 2018) %>%
-  left_join(INV) %>%
-  filter(NUTS2 %in% geo_data$geo) %>%
-  select(NUTS2, IPC4) %>%
-  mutate(count = 1) %>%
-  filter(IPC4 != "")
-
-IPC4_NUTS2_1994_2018 <- IPC %>%
-  filter(prio_year >= 1994 & prio_year <= 2018) %>%
-  left_join(INV) %>%
-  filter(NUTS2 %in% geo_data$NUTS2) %>%
-  right_join(geo_data) %>%
-  select(NUTS2, IPC4) %>%
-  mutate(count = 1) %>%
-  filter(IPC4 != "")
-  
-length(unique(IPC4_NUTS2_1994_2018$NUTS2))
-
-IPC4_NUTS2_1994_2018_count <- IPC4_NUTS2_1994_2018 %>%
-  group_by(NUTS2) %>%
-  count(IPC4)
-
-# amount of technological classes
-length(unique(IPC4_NUTS2_1994_2018$IPC4))
-# amount of regions
-length(unique(IPC4_NUTS2_1994_2018$NUTS2))
-# amount of countries
-length(unique(substr(IPC4_NUTS2_1994_2018$NUTS2, 1, 2)))
-# missingness in islands of France (FRA1-5), Cueta in Spain (ES63)
-setdiff(geo_data$NUTS2, IPC4_NUTS2_1994_2018$NUTS2)
-
-ggplot(IPC4_NUTS2_1994_2018_count, aes(x=n)) + geom_density(n=16) + scale_x_log10() +
-  theme_pubr(base_size = 18, base_family = "Georgia") +
-  ylab("Density\n") + xlab("\nNumber of Patents per Technological Field per Region")
-
-# ---- data to matrix to entry ----
-
-setwd("../../../EconomicGeography/Functions/")
-getwd()
-dir()
-source("function_entry_period.R")
-entry_period <- function_entry_period(IPC=IPC, APP=APP, geo_data=geo_data,
-                                      end_year_input=2018, number_period_input=5, length_period_input=5)
-
-# descriptive output
-mean(entry_period$entry, na.rm=TRUE)
-sd(entry_period$entry, na.rm=TRUE)
-sum(is.na(entry_period$entry))
-
-getwd()
-write.csv(entry_period, "../Data/entry_period.csv", row.names=FALSE)
-entry_period <- read.csv("../Data/entry_period.csv", sep=",")
-
-# ---- data to matrix to relatedness density ----
-
-
-
-
-
-
-

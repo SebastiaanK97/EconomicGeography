@@ -4,6 +4,11 @@ library(mice)
 library(tidyverse)
 library(naniar)
 
+# https://cran.r-project.org/web/packages/imputeTS/vignettes/imputeTS-Time-Series-Missing-Value-Imputation-in-R.pdf
+# https://cran.r-project.org/web/packages/imputeTS/imputeTS.pdf
+# https://www.kaggle.com/code/kmkarakaya/missing-data-and-time-series-prediction-by-prophet
+# https://stats.stackexchange.com/questions/104565/how-to-use-auto-arima-to-impute-missing-values
+
 # ---- data ----
 
 # set working directory
