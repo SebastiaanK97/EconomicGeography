@@ -1,6 +1,6 @@
 
 # function patent data frame to coocurrence matrix to entry data frame
-function_entry_period <- function(IPC, APP, geo_data, end_year_input, number_period_input, length_period_input) {
+function_entry_period <- function(df, end_year_input, number_period_input, length_period_input) {
   #' Entry of Technological fields per Region per Period
   #' 
   #' @description Computes the entry of technological fields
@@ -10,9 +10,9 @@ function_entry_period <- function(IPC, APP, geo_data, end_year_input, number_per
   #' @param geo_data: Data frame from Eurostat to define regions.
   
   # define time frame
-  end_year_input <- 2018
-  number_period_input <- 5
-  length_period_input <- 5
+  end_year_input <- end_year_input
+  number_period_input <- number_period_input
+  length_period_input <- length_period_input
   start_year_input <- end_year_input - (number_period_input * length_period_input) + 1
   
   period <- 1:length_period_input
@@ -21,21 +21,20 @@ function_entry_period <- function(IPC, APP, geo_data, end_year_input, number_per
   time_frame <- as.data.frame(cbind(period, start, end))
   
   for (i in 1:nrow(time_frame["period"])) {
-    
+
     # create variable name in for-loop for t
     name <-  paste("mat_RTA_t", i, sep = "")
-    
+
     # query and clean data for periods
-    IPC4_NUTS2 <- IPC %>%
+    CPC4_NUTS2 <- df %>%
       filter(prio_year >= time_frame[i, "start"] & prio_year <= time_frame[i, "end"]) %>%
-      left_join(APP) %>%
-      filter(NUTS2 %in% geo_data$geo) %>%
-      select(NUTS2, IPC4) %>%
-      mutate(count = 1) %>%
-      filter(IPC4 != "")
+      select(-appln_id, -prio_year) %>%
+      filter(CPC4 != "") %>%
+      filter(NUTS2 != "") %>%
+      drop_na()
     
     # count patents per region per technological field
-    mat_count <- get.matrix(IPC4_NUTS2)
+    mat_count <- get.matrix(CPC4_NUTS2)
     # compute Revealed Technological Advantage (RTA) for period in for-loop
     mat_RTA <- location.quotient(mat_count, binary = TRUE)
     

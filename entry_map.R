@@ -17,51 +17,9 @@ c("#CF553A", "#DE8C3F", "#E8B63C", "#93BA5A", "#27A581")
 
 library(classInt)
 
-# ---- regional demarcation ----
+# ---- import data ----
 
-# European Union (EU) member states
-ctry_EU_long <- c("Austria","Belgium","Bulgaria","Croatia","Cyprus",
-                  "Czech Rep.","Denmark","Estonia","Finland","France",
-                  "Germany","Greece","Hungary","Ireland","Italy","Latvia",
-                  "Lithuania","Luxembourg","Malta","Netherlands","Poland",
-                  "Portugal","Romania","Slovakia","Slovenia","Spain",
-                  "Sweden","United Kingdom")
-ctry_EU_short <- c("AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
-                   "DE", "EL", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
-                   "PL", "PT", "RO", "SK", "SI", "ES", "SE", "UK")
-# European Free Trade Association (EFTA) member states
-ctry_EFTA_long <- c("Iceland", "Norway", "Liechtenstein", "Switzerland")
-ctry_EFTA_short <- c("IS", "NO", "LI", "CH")
-
-# binding data and creating data frame for countries
-ctry_long <- c(ctry_EU_long, ctry_EFTA_long)
-ctry_short <- c(ctry_EU_short, ctry_EFTA_short)
-ctry <- as.data.frame(cbind(ctry_short, ctry_long))
-colnames(ctry) <- c("short", "long")
-
-# amount of regions
-length(unique(substr(APP$reg_code, 1, 4)))
-# set NUTS2 regions to four-digit Nomenclature of Territorial Units for Statistics
-APP$NUTS2 <- substr(APP$reg_code, 1, 4)
-
-geo_data <- get_eurostat_geospatial(output_class = "sf", resolution = "60", nuts_level = "2", year = "2013") %>%
-  filter(CNTR_CODE %in% ctry$short)
-# amount of regions EU + EFTA
-length(unique(geo_data$geo))
-
-geo_data_UK <- get_eurostat_geospatial(output_class = "sf", resolution = "60", nuts_level = "2", year = "2010") %>%
-  filter(geo %in% c("UKI1", "UKI2"))
-
-# replace regions United Kingdom
-geo_data <- geo_data %>%
-  bind_rows(geo_data_UK) %>%
-  filter(!geo %in% c("UKI3", "UKI4", "UKI5", "UKI6", "UKI7"))
-# rename Iceland NUTS2
-geo_data[["geo"]][geo_data[["geo"]] == "IS00"] <- "IS01"
-length(unique(geo_data$geo))
-
-# ---- entry to map periodical ----
-
+CPC4_NUTS2_1994_2018 <- read.csv("CPC4_NUTS2_1994_2018.csv", sep=",")
 technological_entry_period <- read.csv("Data/technological_entry_period.csv", sep=",")
 
 sum_entry <- technological_entry_period %>%
@@ -73,6 +31,8 @@ EU_EFTA <- geo_data %>%
   filter(geo %in% unique(technological_entry_period$region)) %>%
   left_join(sum_entry) %>%
   mutate(class=cut(n, classIntervals(sum_entry$n, n=5, style="jenks")$brks, include.lowest=T))
+
+# ---- entry to map periodical ----
 
 ggplot(EU_EFTA, aes(x=n)) + geom_histogram(fill="#003764", colour="white", bins=25) +
   theme_pubr(base_size = 18, base_family = "Georgia") +

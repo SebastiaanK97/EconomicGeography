@@ -10,9 +10,9 @@ function_rd_period <- function(IPC, APP, geo_data, end_year_input, number_period
   #' @param geo_data: Data frame from Eurostat to define regions.
   
   # define time frame
-  end_year_input <- 2018
-  number_period_input <- 5
-  length_period_input <- 5
+  end_year_input <- end_year_input
+  number_period_input <- number_period_input
+  length_period_input <- length_period_input
   start_year_input <- end_year_input - (number_period_input * length_period_input) + 1
   
   period <- 1:length_period_input
