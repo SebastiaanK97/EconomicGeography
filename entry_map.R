@@ -27,6 +27,8 @@ sum_entry <- technological_entry_period %>%
   summarise(n=sum(entry, na.rm=TRUE)) %>%
   select(geo=region, n, period)
 
+length(unique(sum_entry$geo))
+
 EU_EFTA <- geo_data %>%
   filter(geo %in% unique(technological_entry_period$region)) %>%
   left_join(sum_entry) %>%
