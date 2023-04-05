@@ -3,4 +3,5 @@
 .RData
 .Ruserdata
 
-/Data
+cat .gitignore
+/Data/data.csv
